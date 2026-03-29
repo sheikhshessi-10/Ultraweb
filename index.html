@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FF4D00">
+  <title>Ultra | AI-Powered Fan Sync</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF4D00'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='system-ui%2C-apple-system%2Csans-serif' font-weight='700' font-size='20' fill='white'%3EU%3C/text%3E%3C/svg%3E">
+  <style>
+    /* ─── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+    html { scroll-behavior:smooth }
+
+    /* ─── Custom Properties ──────────────────────────────────── */
+    :root {
+      --orange:        #FF4D00;
+      --orange-dark:   #E04400;
+      --orange-amber:  #FF9A3C;
+      --orange-light:  #FFF4EE;
+      --orange-glow:   rgba(255,77,0,0.22);
+
+      --bg-base:       #FFFFFF;
+      --bg-cream:      #F8F5F2;
+      --bg-warm:       #FFF4EE;
+      --bg-dark:       #0D0D0D;
+
+      --ink:           #0D0D0D;
+      --ink-mid:       #6B7280;
+      --ink-faint:     rgba(13,13,13,0.32);
+
+      --blue-gray:     #8B9EB7;
+
+      --border:        rgba(0,0,0,0.07);
+      --border-mid:    rgba(0,0,0,0.12);
+
+      --glass-bg:      rgba(255,255,255,0.55);
+      --glass-border:  rgba(255,255,255,0.68);
+
+      --ease-expo:     cubic-bezier(0.16,1,0.3,1);
+      --ease-reveal:   cubic-bezier(0.4,0,0.2,1);
+
+      --space-section: clamp(80px,10vw,140px);
+      --space-inner:   clamp(20px,6vw,80px);
+    }
+
+    /* ─── Base ───────────────────────────────────────────────── */
+    body {
+      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      background: var(--bg-base);
+      color: var(--ink);
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ─── Scroll Animation Base ──────────────────────────────── */
+    [data-anim] {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 0.75s var(--ease-expo),
+        transform 0.75s var(--ease-expo);
+    }
+    [data-anim].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Navigation ─────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 22px 0;
+      background: rgba(255,255,255,0);
+      backdrop-filter: blur(0px);
+      -webkit-backdrop-filter: blur(0px);
+      border-bottom: 1px solid transparent;
+      transition:
+        background 0.45s ease,
+        backdrop-filter 0.45s ease,
+        -webkit-backdrop-filter 0.45s ease,
+        border-color 0.45s ease;
+    }
+    .nav.nav--scrolled {
+      background: rgba(255,255,255,0.84);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 clamp(20px,5vw,60px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-logo {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.45s ease, opacity 0.2s ease;
+    }
+    .nav-logo:hover { opacity: 0.75 }
+    .nav-logo span { color: var(--orange) }
+    .nav--scrolled .nav-logo { color: var(--ink) }
+    .nav--scrolled .nav-logo span { color: var(--orange) }
+    .nav-link {
+      font-size: 0.82rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover { color: #fff }
+    .nav--scrolled .nav-link { color: var(--ink-mid) }
+    .nav--scrolled .nav-link:hover { color: var(--ink) }
+
+    /* ─── Hero ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      min-height: 600px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #1a0e06 0%, #0d0805 50%, #180a00 100%);
+    }
+
+    /* Video */
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* Glass overlay — blur while playing, clears on ended */
+    .hero-glass {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: rgba(10,8,5,0);
+      backdrop-filter: blur(0px) saturate(1) brightness(1);
+      -webkit-backdrop-filter: blur(0px) saturate(1) brightness(1);
+      transition:
+        backdrop-filter 1.7s var(--ease-reveal),
+        -webkit-backdrop-filter 1.7s var(--ease-reveal),
+        background 1.7s var(--ease-reveal);
+    }
+    .hero-glass.hero-glass--active {
+      background: rgba(10,8,5,0.18);
+      backdrop-filter: blur(16px) saturate(1.9) brightness(0.86);
+      -webkit-backdrop-filter: blur(16px) saturate(1.9) brightness(0.86);
+    }
+    /* After reveal: subtle gradient for text legibility */
+    .hero-glass.hero-glass--revealed {
+      background: linear-gradient(
+        to top,
+        rgba(8,6,4,0.52) 0%,
+        rgba(8,6,4,0.18) 38%,
+        transparent 68%
+      );
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(80px,10vw,120px) clamp(20px,6vw,80px) clamp(40px,6vw,80px);
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange-amber);
+      background: rgba(255,154,60,0.14);
+      border: 1px solid rgba(255,154,60,0.32);
+      border-radius: 9999px;
+      padding: 6px 18px;
+      display: inline-block;
+      margin-bottom: 1.8rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .hero-title {
+      font-size: clamp(4rem,11vw,8rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 0.9;
+      margin-bottom: 1.6rem;
+      text-shadow:
+        0 0 100px rgba(255,255,255,0.12),
+        0 4px 48px rgba(0,0,0,0.45);
+    }
+    .hero-title__accent {
+      color: var(--orange);
+      text-shadow:
+        0 0 70px rgba(255,77,0,0.6),
+        0 0 140px rgba(255,77,0,0.25),
+        0 4px 24px rgba(255,77,0,0.35);
+    }
+    .hero-tagline {
+      font-size: clamp(0.72rem,1vw,0.82rem);
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 1rem;
+    }
+    .hero-sub {
+      font-size: clamp(1.2rem,2.4vw,1.8rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.88);
+      max-width: 38rem;
+      line-height: 1.45;
+      margin-bottom: 2.8rem;
+    }
+    .hero-sub strong {
+      font-weight: 500;
+      color: #fff;
+    }
+
+    /* ─── Buttons ────────────────────────────────────────────── */
+    .btn-pill {
+      display: inline-block;
+      padding: 15px 40px;
+      border-radius: 9999px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition:
+        background 0.25s ease,
+        transform 0.35s var(--ease-expo),
+        box-shadow 0.35s ease,
+        border-color 0.25s ease;
+    }
+    .btn-pill--primary {
+      background: var(--orange);
+      color: #fff;
+    }
+    .btn-pill--primary:hover {
+      background: var(--orange-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(255,77,0,0.35);
+    }
+    .btn-pill--primary.hero-cta {
+      animation: hero-pulse 2.6s ease 1.6s 2;
+    }
+    @keyframes hero-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(255,77,0,0.55) }
+      65%  { box-shadow: 0 0 0 14px rgba(255,77,0,0) }
+      100% { box-shadow: 0 0 0 0 rgba(255,77,0,0) }
+    }
+    .btn-pill--ghost {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.22);
+    }
+    .btn-pill--ghost:hover {
+      border-color: rgba(255,255,255,0.7);
+      transform: translateY(-2px);
+    }
+
+    /* ─── Scroll indicator ───────────────────────────────────── */
+    .hero-scroll {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fade-in-scroll 0.6s ease 2s forwards;
+    }
+    @keyframes fade-in-scroll { to { opacity: 1 } }
+    .hero-scroll__line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.55), transparent);
+      animation: scroll-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes scroll-pulse {
+      0%,100% { transform: scaleY(1); opacity: 0.6 }
+      50%      { transform: scaleY(0.5); opacity: 0.2 }
+    }
+    .hero-scroll__label {
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.32);
+    }
+
+    /* ─── Statement Section ──────────────────────────────────── */
+    .statement-section {
+      background: var(--bg-base);
+      padding: var(--space-section) var(--space-inner);
+      border-bottom: 1px solid var(--border);
+    }
+    .statement-inner {
+      max-width: 880px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .statement-text {
+      font-size: clamp(1.55rem,3.2vw,2.4rem);
+      font-weight: 300;
+      line-height: 1.55;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .statement-text strong { font-weight: 600 }
+    .statement-rule {
+      width: 40px;
+      height: 1px;
+      background: var(--border-mid);
+      margin: 2.2rem auto 0;
+    }
+
+    /* ─── Section Shared ─────────────────────────────────────── */
+    .section-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1rem;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: clamp(48px,7vw,88px);
+    }
+    .t-display {
+      font-size: clamp(2.2rem,5vw,3.8rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      font-size: clamp(1rem,1.6vw,1.15rem);
+      font-weight: 300;
+      color: var(--ink-mid);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ─── How It Works ───────────────────────────────────────── */
+    .how-section {
+      background: var(--bg-cream);
+      padding: var(--space-section) var(--space-inner);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .how-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 20px;
+    }
+    .glass-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px) saturate(1.6) brightness(1.03);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6) brightness(1.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      padding: clamp(28px,4vw,44px);
+      box-shadow:
+        0 2px 24px rgba(0,0,0,0.04),
+        0 1px 2px rgba(0,0,0,0.05);
+      transition:
+        transform 0.4s var(--ease-expo),
+        box-shadow 0.4s var(--ease-expo);
+    }
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.08),
+        0 4px 12px rgba(0,0,0,0.06);
+    }
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        128deg,
+        transparent 0%,
+        rgba(255,255,255,0.16) 50%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      transition: transform 0.7s var(--ease-expo);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    .glass-card:hover::before { transform: translateX(120%) }
+
+    .card-number {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .card-number::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,77,0,0.2);
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .card-body {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--ink-mid);
+      line-height: 1.7;
+    }
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--orange-light);
+      border: 1px solid rgba(255,77,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .card-icon svg { width: 20px; height: 20px; stroke: var(--orange); fill: none; stroke-width: 1.8 }
+
+    /* ─── Stat Section ───────────────────────────────────────── */
+    .stat-section {
+      background: var(--bg-warm);
+      border-top: 1px solid rgba(255,77,0,0.12);
+      border-bottom: 1px solid rgba(255,77,0,0.12);
+      padding: var(--space-section) var(--space-inner);
+      text-align: center;
+    }
+    .stat-inner { max-width: 700px; margin: 0 auto }
+    .stat-number {
+      font-size: clamp(7rem,19vw,14rem);
+      font-weight: 700;
+      color: var(--orange);
+      line-height: 0.82;
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-unit {
+      font-size: clamp(0.85rem,1.8vw,1.2rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--orange-dark);
+      margin-top: 16px;
+    }
+    .stat-desc {
+      font-size: clamp(0.95rem,1.4vw,1.05rem);
+      font-weight: 300;
+      color: var(--ink-mid);
+      margin-top: 28px;
+      line-height: 1.7;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ─── Markets Section ────────────────────────────────────── */
+    .markets-section {
+      background: var(--bg-cream);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-section) var(--space-inner);
+      text-align: center;
+    }
+    .markets-inner { max-width: 1100px; margin: 0 auto }
+    .market-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .market-pill {
+      font-size: 0.82rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      padding: 10px 22px;
+      border: 1px solid var(--border-mid);
+      border-radius: 9999px;
+      color: var(--ink-mid);
+      background: var(--bg-base);
+      transition:
+        border-color 0.25s ease,
+        color 0.25s ease,
+        background 0.25s ease,
+        transform 0.3s var(--ease-expo);
+      cursor: default;
+    }
+    .market-pill:hover,
+    .market-pill.is-active {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: var(--orange-light);
+      transform: translateY(-2px);
+    }
+
+    /* ─── Countdown Section ──────────────────────────────────── */
+    .countdown-section {
+      background: var(--bg-base);
+      border-top: 1px solid var(--border);
+      padding: var(--space-section) var(--space-inner);
+      text-align: center;
+    }
+    .countdown-inner { max-width: 700px; margin: 0 auto }
+    .countdown-intro {
+      font-size: clamp(1.3rem,2.8vw,2rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.4;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .countdown-intro strong { font-weight: 600 }
+    .countdown-event {
+      font-size: clamp(1.6rem,4vw,2.8rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--orange);
+      margin-bottom: 52px;
+    }
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      margin-bottom: 56px;
+    }
+    .cd-block {
+      padding: 0 clamp(20px,4vw,48px);
+      text-align: center;
+    }
+    .cd-block + .cd-block { border-left: 1px solid var(--border) }
+    .cd-num {
+      font-size: clamp(2.8rem,5.5vw,4rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      display: block;
+    }
+    .cd-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+      margin-top: 8px;
+      display: block;
+    }
+    .countdown-rule {
+      width: 40px;
+      height: 1px;
+      background: var(--border-mid);
+      margin: 0 auto 28px;
+    }
+    .countdown-proof {
+      font-size: 0.9rem;
+      color: var(--ink-mid);
+      font-weight: 300;
+      margin-bottom: 28px;
+    }
+    .countdown-proof strong { font-weight: 600; color: var(--ink) }
+
+    /* ─── Partner CTA Section ────────────────────────────────── */
+    .partner-section {
+      background: var(--bg-dark);
+      color: #fff;
+      padding: var(--space-section) var(--space-inner);
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .partner-inner { max-width: 900px; margin: 0 auto }
+    .partner-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,154,60,0.85);
+      margin-bottom: 1rem;
+    }
+    .partner-title {
+      font-size: clamp(2.2rem,4.8vw,3.8rem);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+    .partner-title strong { font-weight: 600; color: var(--orange) }
+    .partner-sub {
+      font-size: clamp(1rem,1.8vw,1.15rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.5);
+      max-width: 44rem;
+      margin: 0 auto 52px;
+      line-height: 1.7;
+    }
+    .cta-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────── */
+    .footer {
+      background: var(--bg-dark);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 52px clamp(20px,5vw,60px) 40px;
+    }
+    .footer-row {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+    .footer-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+    }
+    .footer-logo span { color: var(--orange) }
+    .footer-nav { display: flex; gap: 28px }
+    .footer-nav a {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.38);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+    .footer-nav a:hover { color: rgba(255,255,255,0.85) }
+    .footer-email {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.38);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+    .footer-email:hover { color: rgba(255,255,255,0.85) }
+    .footer-domain {
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.04em;
+    }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* ─── Waitlist Modal ─────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(8,6,4,0.72);
+      backdrop-filter: blur(12px) saturate(1.4);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-backdrop.is-open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 480px;
+      padding: clamp(36px,6vw,52px);
+      position: relative;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.35s var(--ease-expo), opacity 0.35s ease;
+      opacity: 0;
+      box-shadow:
+        0 32px 80px rgba(0,0,0,0.22),
+        0 4px 16px rgba(0,0,0,0.1);
+    }
+    .modal-backdrop.is-open .modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-cream);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      color: var(--ink-mid);
+    }
+    .modal-close:hover { background: var(--border-mid) }
+    .modal-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none }
+    .modal-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 10px;
+    }
+    .modal-title {
+      font-size: clamp(1.6rem,4vw,2.1rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--ink-mid);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .form-field {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .form-field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+      margin-bottom: 8px;
+    }
+    .form-field input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      font-weight: 400;
+      color: var(--ink);
+      background: var(--bg-cream);
+      border: 1.5px solid transparent;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      -webkit-appearance: none;
+    }
+    .form-field input::placeholder { color: rgba(13,13,13,0.32) }
+    .form-field input:focus {
+      background: #fff;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(255,77,0,0.1);
+    }
+    .form-field input.field-error {
+      border-color: #e53935;
+      box-shadow: 0 0 0 4px rgba(229,57,53,0.1);
+    }
+    .field-err-msg {
+      font-size: 0.72rem;
+      color: #e53935;
+      margin-top: 5px;
+      display: none;
+    }
+    .field-error + .field-err-msg { display: block }
+    .form-field textarea:focus {
+      background: #fff;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(255,77,0,0.1);
+      outline: none;
+    }
+    .modal-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.25s ease, transform 0.3s var(--ease-expo), box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .modal-submit:hover {
+      background: var(--orange-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(255,77,0,0.3);
+    }
+    .modal-submit:active { transform: translateY(0) }
+    .modal-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none }
+    .submit-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .modal-submit.is-loading .submit-spinner { display: block }
+    .modal-submit.is-loading .submit-label { display: none }
+    .modal-privacy {
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--ink-faint);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+    /* Success state */
+    .modal-success {
+      display: none;
+      text-align: center;
+      padding: 20px 0 8px;
+    }
+    .modal-success.is-shown { display: block }
+    .modal-form.is-hidden { display: none }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: var(--orange-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .success-icon svg { width: 28px; height: 28px; stroke: var(--orange); stroke-width: 2.5; fill: none }
+    .success-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .success-sub {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--ink-mid);
+      line-height: 1.6;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    /* ─── Mobile ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-link { display: none }
+      .hero-content { padding-top: 90px }
+      .hero-title { font-size: clamp(3.2rem,15vw,5.5rem) }
+      .hero-sub { font-size: 0.72rem }
+      .cards-grid { grid-template-columns: 1fr; gap: 14px }
+      .cd-block { padding: 0 clamp(12px,3vw,28px) }
+      .cta-buttons { flex-direction: column; align-items: center }
+      .footer-row { flex-direction: column; align-items: flex-start; gap: 16px }
+      .footer-nav { gap: 18px }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ─────────────────────────────────────────── -->
+  <nav class="nav" id="mainNav">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">ULTRA<span>.</span></a>
+      <a href="#" class="nav-link" data-waitlist>Early Access</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────── -->
+  <section class="hero">
+    <!-- Layer 1: Video -->
+    <video
+      id="heroVideo"
+      class="hero-video"
+      src="ultra-hero.mp4"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+
+    <!-- Layer 2: Glass overlay -->
+    <div id="heroGlass" class="hero-glass hero-glass--active"></div>
+
+    <!-- Layer 3: Content -->
+    <div class="hero-content">
+      <p class="hero-eyebrow" data-anim data-delay="100">FIFA World Cup 2026</p>
+      <h1 class="hero-title" data-anim data-delay="220">
+        ULT<span class="hero-title__accent">R</span>A
+      </h1>
+      <p class="hero-tagline" data-anim data-delay="370">The Stadium In Your Pocket</p>
+      <p class="hero-sub" data-anim data-delay="480"><strong>AI-Powered</strong> Chant &amp; Theatrics for the Ultimate Match Experience</p>
+      <a href="#" class="btn-pill btn-pill--primary hero-cta" data-anim data-delay="620" data-waitlist>Join The Waitlist</a>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="hero-scroll" aria-hidden="true">
+      <span class="hero-scroll__line"></span>
+      <span class="hero-scroll__label">Scroll</span>
+    </div>
+  </section>
+
+  <!-- ── Statement ──────────────────────────────────────────── -->
+  <section class="statement-section">
+    <div class="statement-inner">
+      <p class="statement-text" data-anim>
+        Ultra uses <strong>AI</strong> to synchronize the sound and light on every fan's phone
+        &mdash; turning an entire stadium into <strong>one unified, AI-orchestrated force.</strong>
+      </p>
+      <div class="statement-rule" data-anim data-delay="200"></div>
+    </div>
+  </section>
+
+  <!-- ── How It Works ───────────────────────────────────────── -->
+  <section class="how-section">
+    <div class="how-inner">
+      <header class="section-header">
+        <p class="section-eyebrow" data-anim>How It Works</p>
+        <h2 class="t-display" data-anim data-delay="80">Three steps. Zero friction.</h2>
+        <p class="section-sub" data-anim data-delay="160">Maximum eruption.</p>
+      </header>
+      <div class="cards-grid">
+
+        <div class="glass-card" data-anim data-delay="0">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="4"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <p class="card-number">01 &mdash; Scan</p>
+          <h3 class="card-title">Instant Connect</h3>
+          <p class="card-body">QR code or link — that's it. The app loads instantly in your browser. You're synced with the crowd in 3 seconds.</p>
+        </div>
+
+        <div class="glass-card" data-anim data-delay="110">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+          </div>
+          <p class="card-number">02 &mdash; Vote</p>
+          <h3 class="card-title">The Crowd Decides</h3>
+          <p class="card-body">Fans vote on the next chant in real-time. Democracy at 120 decibels.</p>
+        </div>
+
+        <div class="glass-card" data-anim data-delay="220">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+            </svg>
+          </div>
+          <p class="card-number">03 &mdash; Sync</p>
+          <h3 class="card-title">The Stadium Erupts</h3>
+          <p class="card-body">Every phone. Same sound. Same light. Same millisecond. The stadium erupts as one.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stat ───────────────────────────────────────────────── -->
+  <section class="stat-section">
+    <div class="stat-inner">
+      <div class="stat-number" id="statNumber" data-anim>&lt;50</div>
+      <div class="stat-unit" data-anim data-delay="100">milliseconds</div>
+      <p class="stat-desc" data-anim data-delay="200">
+        Synchronization precision across every device.<br>
+        Below the threshold of human perception.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Markets ────────────────────────────────────────────── -->
+  <section class="markets-section">
+    <div class="markets-inner">
+      <header class="section-header">
+        <p class="section-eyebrow" data-anim>Every Crowd. Everywhere.</p>
+        <h2 class="t-display" data-anim data-delay="80">Ultra starts with football.</h2>
+        <p class="section-sub" data-anim data-delay="160">It doesn't end there.</p>
+      </header>
+      <div class="market-pills">
+        <span class="market-pill is-active" data-anim data-delay="0">FIFA World Cup 2026</span>
+        <span class="market-pill" data-anim data-delay="50">NBA</span>
+        <span class="market-pill" data-anim data-delay="100">NFL</span>
+        <span class="market-pill" data-anim data-delay="150">College Sports</span>
+        <span class="market-pill" data-anim data-delay="200">UFC</span>
+        <span class="market-pill" data-anim data-delay="250">Cricket</span>
+        <span class="market-pill" data-anim data-delay="300">Music Festivals</span>
+        <span class="market-pill" data-anim data-delay="350">Esports</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Countdown ──────────────────────────────────────────── -->
+  <section class="countdown-section" id="waitlist">
+    <div class="countdown-inner">
+      <p class="countdown-intro" data-anim>All set to electrify the <strong>biggest event in sports history</strong></p>
+      <div class="countdown-event" data-anim data-delay="100">FIFA World Cup 2026 &mdash; May 11</div>
+      <div class="countdown-grid" data-anim data-delay="200">
+        <div class="cd-block">
+          <span class="cd-num" id="cd-days">--</span>
+          <span class="cd-label">Days</span>
+        </div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-hours">--</span>
+          <span class="cd-label">Hours</span>
+        </div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-minutes">--</span>
+          <span class="cd-label">Minutes</span>
+        </div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-seconds">--</span>
+          <span class="cd-label">Seconds</span>
+        </div>
+      </div>
+      <div class="countdown-rule" data-anim data-delay="300"></div>
+      <p class="countdown-proof" data-anim data-delay="380">
+        Early access spots are limited
+      </p>
+      <a href="#" class="btn-pill btn-pill--primary" data-anim data-delay="460" data-waitlist>
+        Join The Waitlist For Early Access
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Partner CTA ────────────────────────────────────────── -->
+  <section class="partner-section">
+    <div class="partner-inner">
+      <p class="partner-eyebrow" data-anim>Get Involved</p>
+      <h2 class="partner-title" data-anim data-delay="80">
+        We Are <strong>Ultra</strong>
+      </h2>
+      <p class="partner-sub" data-anim data-delay="160">
+        Be the first to experience AI-powered fan synchronization at the World Cup.
+        Partner with us to bring Ultra's AI to your venue, league, or event.
+      </p>
+      <div class="cta-buttons" data-anim data-delay="260">
+        <a href="#" class="btn-pill btn-pill--primary" data-waitlist>Request Early Access</a>
+        <a href="#" class="btn-pill btn-pill--ghost" data-partner>Partner With Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Waitlist Modal ────────────────────────────────────── -->
+  <div class="modal-backdrop" id="waitlistModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Form state -->
+      <div class="modal-form" id="modalForm">
+        <p class="modal-eyebrow">Early Access</p>
+        <h2 class="modal-title" id="modalTitle">Join the<br>Waitlist</h2>
+        <p class="modal-sub">Be among the first to experience AI-powered fan synchronization at the World Cup.</p>
+
+        <form id="waitlistForm" novalidate>
+          <div class="form-field">
+            <label for="wl-name">Full Name</label>
+            <input type="text" id="wl-name" name="name" placeholder="Your name" autocomplete="name">
+            <p class="field-err-msg">Please enter your name</p>
+          </div>
+          <div class="form-field">
+            <label for="wl-email">Email Address</label>
+            <input type="email" id="wl-email" name="email" placeholder="you@example.com" autocomplete="email">
+            <p class="field-err-msg">Please enter a valid email</p>
+          </div>
+          <input type="hidden" name="_subject" value="New Ultra Waitlist Signup">
+          <button type="submit" class="modal-submit" id="modalSubmit">
+            <span class="submit-label">Secure My Spot</span>
+            <span class="submit-spinner"></span>
+          </button>
+        </form>
+        <p class="modal-privacy">No spam. We'll only reach out when it matters.</p>
+      </div>
+
+      <!-- Success state -->
+      <div class="modal-success" id="modalSuccess">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2 class="success-title">You're In.</h2>
+        <p class="success-sub">Welcome to the Ultra waitlist. We'll be in touch before the World Cup kicks off.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Partner Modal ─────────────────────────────────────── -->
+  <div class="modal-backdrop" id="partnerModal" role="dialog" aria-modal="true" aria-labelledby="partnerModalTitle">
+    <div class="modal">
+      <button class="modal-close" id="partnerModalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <div class="modal-form" id="partnerForm">
+        <p class="modal-eyebrow">Get In Touch</p>
+        <h2 class="modal-title" id="partnerModalTitle">Partner<br>With Us</h2>
+        <p class="modal-sub">Tell us about your venue, league, or event and we'll get back to you directly.</p>
+
+        <form id="partnerContactForm" novalidate>
+          <div class="form-field">
+            <label for="p-name">Your Name</label>
+            <input type="text" id="p-name" name="name" placeholder="Full name" autocomplete="name">
+            <p class="field-err-msg">Please enter your name</p>
+          </div>
+          <div class="form-field">
+            <label for="p-company">Organisation / Club</label>
+            <input type="text" id="p-company" name="company" placeholder="Team, league, venue…" autocomplete="organization">
+            <p class="field-err-msg">Please enter your organisation</p>
+          </div>
+          <div class="form-field">
+            <label for="p-email">Email Address</label>
+            <input type="email" id="p-email" name="email" placeholder="you@example.com" autocomplete="email">
+            <p class="field-err-msg">Please enter a valid email</p>
+          </div>
+          <div class="form-field">
+            <label for="p-message">What would you like to do with Ultra?</label>
+            <textarea id="p-message" name="message" placeholder="Tell us about your event, audience size, or idea…" rows="3" style="width:100%;padding:14px 18px;font-size:0.95rem;font-family:inherit;font-weight:400;color:var(--ink);background:var(--bg-cream);border:1.5px solid transparent;border-radius:12px;outline:none;resize:vertical;transition:border-color 0.2s ease,background 0.2s ease,box-shadow 0.2s ease;-webkit-appearance:none;"></textarea>
+          </div>
+          <button type="submit" class="modal-submit" id="partnerSubmit">
+            <span class="submit-label">Send Message</span>
+            <span class="submit-spinner"></span>
+          </button>
+        </form>
+        <p class="modal-privacy">Your details go directly to our team. We reply within 24 hours.</p>
+      </div>
+
+      <div class="modal-success" id="partnerSuccess">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2 class="success-title">Message Sent.</h2>
+        <p class="success-sub">We'll be in touch within 24 hours. Let's build something extraordinary together.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-row">
+      <a href="#" class="footer-logo">ULTRA<span>.</span></a>
+      <nav class="footer-nav">
+        <a href="#">Home</a>
+        <a href="#waitlist">Waitlist</a>
+        <a href="mailto:hello@weareultra.app">Contact</a>
+      </nav>
+      <a href="mailto:hello@weareultra.app" class="footer-email">hello@weareultra.app</a>
+      <span class="footer-domain">weareultra.app</span>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Ultra. All rights reserved.</div>
+  </footer>
+
+  <script>
+  // ── 0. Waitlist Modal ────────────────────────────────────────
+  (function () {
+    var backdrop = document.getElementById('waitlistModal');
+    var form     = document.getElementById('waitlistForm');
+    var modalForm    = document.getElementById('modalForm');
+    var modalSuccess = document.getElementById('modalSuccess');
+    var submitBtn    = document.getElementById('modalSubmit');
+
+    // ── Open
+    function openModal() {
+      backdrop.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function () {
+        document.getElementById('wl-name').focus();
+      }, 350);
+    }
+
+    // ── Close
+    function closeModal() {
+      backdrop.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    // Wire all [data-waitlist] triggers
+    document.querySelectorAll('[data-waitlist]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    // Close button
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+
+    // Click backdrop to close
+    backdrop.addEventListener('click', function (e) {
+      if (e.target === backdrop) closeModal();
+    });
+
+    // ESC key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // ── Validate
+    function validate() {
+      var nameEl  = document.getElementById('wl-name');
+      var emailEl = document.getElementById('wl-email');
+      var ok = true;
+
+      nameEl.classList.remove('field-error');
+      emailEl.classList.remove('field-error');
+
+      if (!nameEl.value.trim()) {
+        nameEl.classList.add('field-error'); ok = false;
+      }
+      var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(emailEl.value.trim())) {
+        emailEl.classList.add('field-error'); ok = false;
+      }
+      return ok;
+    }
+
+    // ── Submit via Formspree
+    // Replace YOUR_FORM_ID with your Formspree form ID (e.g. "xpwzgkla")
+    // Sign up free at formspree.io → New Form → copy the ID
+    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!validate()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('is-loading');
+
+      var data = {
+        name:  document.getElementById('wl-name').value.trim(),
+        email: document.getElementById('wl-email').value.trim(),
+        _subject: 'New Ultra Waitlist Signup'
+      };
+
+      fetch(FORMSPREE_ENDPOINT, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body:    JSON.stringify(data)
+      })
+      .then(function (res) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+        if (res.ok) {
+          modalForm.classList.add('is-hidden');
+          modalSuccess.classList.add('is-shown');
+        } else {
+          return res.json().then(function (body) {
+            alert(body.error || 'Something went wrong. Please try again.');
+          });
+        }
+      })
+      .catch(function () {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+        alert('Network error. Please try again.');
+      });
+    });
+
+    // Clear errors on input
+    ['wl-name','wl-email'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', function () {
+        this.classList.remove('field-error');
+      });
+    });
+  })();
+
+  // ── 1. Hero content entrance ─────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      document.querySelectorAll('.hero-content [data-anim]').forEach(function (el) {
+        var delay = parseInt(el.dataset.delay || 0, 10);
+        setTimeout(function () { el.classList.add('is-visible'); }, delay);
+      });
+    }, 280);
+  });
+
+  // ── 2. Video blur → reveal ───────────────────────────────────
+  (function () {
+    var video = document.getElementById('heroVideo');
+    var glass = document.getElementById('heroGlass');
+    var revealed = false;
+
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      glass.classList.remove('hero-glass--active');
+      setTimeout(function () {
+        glass.classList.add('hero-glass--revealed');
+      }, 1750);
+    }
+
+    video.addEventListener('ended', reveal);
+    video.addEventListener('error', reveal);
+
+    // If autoplay is blocked by browser policy, reveal immediately
+    var p = video.play();
+    if (p !== undefined) {
+      p.catch(function () { reveal(); });
+    }
+  })();
+
+  // ── 3. Nav scroll ────────────────────────────────────────────
+  (function () {
+    var nav = document.getElementById('mainNav');
+    function update() {
+      nav.classList.toggle('nav--scrolled', window.scrollY > 72);
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
+  // ── 4. IntersectionObserver — scroll animations ──────────────
+  (function () {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var delay = parseInt(el.dataset.delay || 0, 10);
+        setTimeout(function () { el.classList.add('is-visible'); }, delay);
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -32px 0px' });
+
+    document.querySelectorAll('[data-anim]').forEach(function (el) {
+      if (!el.closest('.hero-content')) obs.observe(el);
+    });
+  })();
+
+  // ── 5. Stat number scramble ──────────────────────────────────
+  (function () {
+    var el = document.getElementById('statNumber');
+    var done = false;
+    var so = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting || done) return;
+      done = true;
+      var digits = '0123456789';
+      var t0 = Date.now();
+      var dur = 900;
+      var iv = setInterval(function () {
+        var progress = (Date.now() - t0) / dur;
+        if (progress >= 1) { el.textContent = '<50'; clearInterval(iv); return; }
+        el.textContent = '<' + digits[Math.floor(Math.random() * 10)];
+      }, 55);
+      so.unobserve(el);
+    }, { threshold: 0.5 });
+    so.observe(el);
+  })();
+
+  // ── 6. Countdown ─────────────────────────────────────────────
+  (function () {
+    var target = new Date('2026-05-11T18:00:00Z').getTime();
+    var secEl  = document.getElementById('cd-seconds');
+    var busy   = false;
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tick() {
+      var diff = target - Date.now();
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(function (id) {
+          document.getElementById(id).textContent = '00';
+        });
+        return;
+      }
+      document.getElementById('cd-days').textContent    = Math.floor(diff / 864e5);
+      document.getElementById('cd-hours').textContent   = pad(Math.floor(diff % 864e5 / 36e5));
+      document.getElementById('cd-minutes').textContent = pad(Math.floor(diff % 36e5 / 6e4));
+
+      var secs = pad(Math.floor(diff % 6e4 / 1e3));
+      if (secEl.textContent !== secs) {
+        secEl.textContent = secs;
+        if (!busy) {
+          busy = true;
+          secEl.style.transition = 'transform 0.16s ease, opacity 0.16s ease';
+          secEl.style.transform  = 'translateY(-5px)';
+          secEl.style.opacity    = '0.35';
+          setTimeout(function () {
+            secEl.style.transform = 'translateY(0)';
+            secEl.style.opacity   = '1';
+            setTimeout(function () { busy = false; }, 180);
+          }, 160);
+        }
+      }
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+
+  // ── 7. Partner Modal ─────────────────────────────────────────
+  (function () {
+    var backdrop    = document.getElementById('partnerModal');
+    var form        = document.getElementById('partnerContactForm');
+    var partnerForm = document.getElementById('partnerForm');
+    var partnerSucc = document.getElementById('partnerSuccess');
+    var submitBtn   = document.getElementById('partnerSubmit');
+
+    function openPartner() {
+      backdrop.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function () { document.getElementById('p-name').focus(); }, 350);
+    }
+    function closePartner() {
+      backdrop.classList.remove('is-open');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-partner]').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); openPartner(); });
+    });
+
+    document.getElementById('partnerModalClose').addEventListener('click', closePartner);
+    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closePartner(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && backdrop.classList.contains('is-open')) closePartner();
+    });
+
+    function validate() {
+      var nameEl    = document.getElementById('p-name');
+      var companyEl = document.getElementById('p-company');
+      var emailEl   = document.getElementById('p-email');
+      var ok = true;
+      [nameEl, companyEl, emailEl].forEach(function (el) { el.classList.remove('field-error'); });
+
+      if (!nameEl.value.trim())    { nameEl.classList.add('field-error');    ok = false; }
+      if (!companyEl.value.trim()) { companyEl.classList.add('field-error'); ok = false; }
+      var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(emailEl.value.trim())) { emailEl.classList.add('field-error'); ok = false; }
+      return ok;
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!validate()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('is-loading');
+
+      var name    = document.getElementById('p-name').value.trim();
+      var company = document.getElementById('p-company').value.trim();
+      var email   = document.getElementById('p-email').value.trim();
+      var message = document.getElementById('p-message').value.trim();
+
+      var subject = encodeURIComponent('Ultra Partnership Enquiry — ' + company);
+      var body = encodeURIComponent(
+        'Name: ' + name + '\n' +
+        'Organisation: ' + company + '\n' +
+        'Email: ' + email + '\n\n' +
+        'Message:\n' + (message || '(none provided)')
+      );
+
+      // Open email client with all details pre-filled
+      window.location.href = 'mailto:sheikhshessi@gmail.com?subject=' + subject + '&body=' + body;
+
+      // Show success state after a brief delay
+      setTimeout(function () {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+        partnerForm.classList.add('is-hidden');
+        partnerSucc.classList.add('is-shown');
+      }, 800);
+    });
+
+    ['p-name','p-company','p-email'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', function () {
+        this.classList.remove('field-error');
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
