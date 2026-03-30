@@ -7,6 +7,11 @@
   <title>Ultra | AI-Powered Fan Sync</title>
   <link rel="icon" type="image/png" href="ultra-logo-icon.png">
   <link rel="apple-touch-icon" href="ultra-logo-icon.png">
+  <!-- Google Fonts: Russo One (display) + Chakra Petch (UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="importmap">{"imports":{"motion":"https://cdn.jsdelivr.net/npm/motion@latest/+esm"}}</script>
   <style>
     /* ─── Reset ─────────────────────────────────────────────── */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
@@ -46,7 +51,7 @@
 
     /* ─── Base ───────────────────────────────────────────────── */
     body {
-      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      font-family: "Chakra Petch",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
       background: var(--bg-base);
       color: var(--ink);
       line-height: 1.65;
@@ -144,7 +149,7 @@
       background: linear-gradient(160deg, #1a0e06 0%, #0d0805 50%, #180a00 100%);
     }
 
-    /* Video */
+    /* Video (stacked: intro on top, main underneath until intro ends) */
     .hero-video {
       position: absolute;
       inset: 0;
@@ -153,6 +158,8 @@
       object-fit: cover;
       z-index: 1;
     }
+    #heroVideo1 { z-index: 1; }
+    #heroVideo2 { z-index: 0; }
 
     /* Glass overlay — blur while playing, clears on ended */
     .hero-glass {
@@ -211,9 +218,10 @@
       -webkit-backdrop-filter: blur(10px);
     }
     .hero-title {
+      font-family: "Russo One", "Chakra Petch", sans-serif;
       font-size: clamp(4rem,11vw,8rem);
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-weight: 400;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #ffffff;
       line-height: 0.9;
@@ -258,6 +266,7 @@
       border-radius: 9999px;
       font-size: 0.88rem;
       font-weight: 500;
+      touch-action: manipulation; /* UI/UX Pro Max: tap-delay rule */
       letter-spacing: 0.03em;
       text-decoration: none;
       font-family: inherit;
@@ -369,9 +378,10 @@
       margin-bottom: clamp(48px,7vw,88px);
     }
     .t-display {
+      font-family: "Russo One", "Chakra Petch", sans-serif;
       font-size: clamp(2.2rem,5vw,3.8rem);
-      font-weight: 600;
-      letter-spacing: -0.03em;
+      font-weight: 400;
+      letter-spacing: 0.02em;
       line-height: 1.1;
       color: var(--ink);
       margin-bottom: 14px;
@@ -412,16 +422,29 @@
       box-shadow:
         0 2px 24px rgba(0,0,0,0.04),
         0 1px 2px rgba(0,0,0,0.05);
-      transition:
-        transform 0.4s var(--ease-expo),
-        box-shadow 0.4s var(--ease-expo);
+      transition: box-shadow 0.4s var(--ease-expo);
     }
     .glass-card:hover {
-      transform: translateY(-5px);
       box-shadow:
         0 20px 60px rgba(0,0,0,0.08),
         0 4px 12px rgba(0,0,0,0.06);
     }
+    /* Spotlight glow — follows cursor via --glow-x/y CSS vars */
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        circle at var(--glow-x, 50%) var(--glow-y, 50%),
+        rgba(255,77,0,0.11) 0%,
+        transparent 62%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .glass-card:hover::after { opacity: 1 }
     .glass-card::before {
       content: '';
       position: absolute;
@@ -549,7 +572,8 @@
         color 0.25s ease,
         background 0.25s ease,
         transform 0.3s var(--ease-expo);
-      cursor: default;
+      cursor: pointer;
+      touch-action: manipulation;
     }
     .market-pill:hover,
     .market-pill.is-active {
@@ -944,6 +968,87 @@
       margin: 0 auto;
     }
 
+    /* ─── Stadium Sync Map ───────────────────────────────────── */
+    .sync-map-section {
+      background: #04080F;
+      padding: var(--space-section) var(--space-inner);
+      border-top: 1px solid rgba(28,195,255,0.1);
+      border-bottom: 1px solid rgba(28,195,255,0.08);
+    }
+    .sync-map-inner { max-width: 900px; margin: 0 auto }
+    .sync-map-inner .section-eyebrow { color: #28C8FF }
+    .sync-map-inner .t-display { color: #fff }
+    .sync-map-inner .section-sub { color: rgba(255,255,255,0.42) }
+    .canvas-wrap {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(28,195,255,0.14);
+      box-shadow: 0 0 64px rgba(28,150,255,0.07);
+    }
+    #stadiumCanvas { display: block; width: 100% }
+
+    /* ─── People Wave ─────────────────────────────────────────── */
+    .wave-section {
+      background: var(--bg-cream);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 0 28px;
+      overflow: hidden;
+    }
+    .wave-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--orange); text-align: center;
+      margin-bottom: 18px;
+    }
+    .wave-svg { display: block; width: 100%; height: auto }
+    .wave-svg line, .wave-svg circle { stroke-linecap: round; fill: none }
+
+    /* ─── Trophy Celebration ─────────────────────────────────── */
+    .trophy-section {
+      position: relative;
+      background: #050508;
+      overflow: hidden;
+      height: clamp(300px, 46vw, 500px);
+      border-top: 1px solid rgba(255,195,40,0.1);
+    }
+    #trophyCanvas { position: absolute; inset: 0; width: 100%; height: 100% }
+    .trophy-svg-wrap {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; pointer-events: none;
+    }
+    .trophy-svg-wrap svg {
+      height: clamp(150px, 28vw, 270px); width: auto;
+      filter: drop-shadow(0 0 28px rgba(255,185,0,0.55)) drop-shadow(0 0 8px rgba(255,185,0,0.3));
+    }
+    .trophy-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 18px; text-align: center; z-index: 3;
+      background: linear-gradient(to top, rgba(5,5,8,0.88) 0%, transparent 100%);
+    }
+    .trophy-bar span {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,200,50,0.65);
+    }
+
+    /* ─── Scroll Progress Bar ────────────────────────────────── */
+    .scroll-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--orange);
+      transform-origin: left center;
+      transform: scaleX(0);
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    /* ─── Canvas CLS prevention ──────────────────────────────── */
+    .canvas-wrap { aspect-ratio: 16 / 8.5 }
+    #stadiumCanvas { aspect-ratio: 16 / 8.5 }
+
     /* ─── Mobile ─────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .nav-link { display: none }
@@ -955,10 +1060,18 @@
       .cta-buttons { flex-direction: column; align-items: center }
       .footer-row { flex-direction: column; align-items: flex-start; gap: 16px }
       .footer-nav { gap: 18px }
+      /* New sections mobile */
+      .sync-map-section { padding: 60px 20px }
+      .trophy-section { height: clamp(240px, 60vw, 340px) }
+      .trophy-svg-wrap svg { height: clamp(110px, 22vw, 180px) }
+      .wave-section { padding: 28px 0 20px }
     }
   </style>
 </head>
 <body>
+
+  <!-- Scroll progress bar -->
+  <div class="scroll-bar" aria-hidden="true"></div>
 
   <!-- ── Navigation ─────────────────────────────────────────── -->
   <nav class="nav" id="mainNav">
@@ -970,12 +1083,21 @@
 
   <!-- ── Hero ───────────────────────────────────────────────── -->
   <section class="hero">
-    <!-- Layer 1: Video -->
+    <!-- Layer 1: Videos (intro → main, back-to-back) -->
     <video
-      id="heroVideo"
+      id="heroVideo1"
       class="hero-video"
-      src="ultra-hero.mp4"
+      src="ultra-hero-2.mp4"
       autoplay
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      id="heroVideo2"
+      class="hero-video hero-video--queued"
+      src="ultra-hero.mp4"
       muted
       playsinline
       preload="auto"
@@ -1063,6 +1185,20 @@
     </div>
   </section>
 
+  <!-- ── Stadium Device Map ──────────────────────────────────── -->
+  <section class="sync-map-section">
+    <div class="sync-map-inner">
+      <header class="section-header">
+        <p class="section-eyebrow" data-anim>AI Synchronization</p>
+        <h2 class="t-display" data-anim data-delay="80">Every device. One signal.</h2>
+        <p class="section-sub" data-anim data-delay="160">Ultra maps every fan in the stadium — locking coordinates, audio delay, and chant across 80,000 devices simultaneously.</p>
+      </header>
+      <div class="canvas-wrap" data-anim data-delay="240">
+        <canvas id="stadiumCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Stat ───────────────────────────────────────────────── -->
   <section class="stat-section">
     <div class="stat-inner">
@@ -1084,17 +1220,24 @@
         <p class="section-sub" data-anim data-delay="160">It doesn't end there.</p>
       </header>
       <div class="market-pills">
-        <span class="market-pill is-active" data-anim data-delay="0">FIFA World Cup 2026</span>
-        <span class="market-pill" data-anim data-delay="50">NBA</span>
-        <span class="market-pill" data-anim data-delay="100">NFL</span>
-        <span class="market-pill" data-anim data-delay="150">College Sports</span>
-        <span class="market-pill" data-anim data-delay="200">UFC</span>
-        <span class="market-pill" data-anim data-delay="250">Cricket</span>
-        <span class="market-pill" data-anim data-delay="300">Music Festivals</span>
-        <span class="market-pill" data-anim data-delay="350">Esports</span>
+        <span class="market-pill is-active">FIFA World Cup 2026</span>
+        <span class="market-pill">NBA</span>
+        <span class="market-pill">NFL</span>
+        <span class="market-pill">College Sports</span>
+        <span class="market-pill">UFC</span>
+        <span class="market-pill">Cricket</span>
+        <span class="market-pill">Music Festivals</span>
+        <span class="market-pill">Esports</span>
       </div>
     </div>
   </section>
+
+  <!-- ── Crowd Wave ───────────────────────────────────────────── -->
+  <div class="wave-section" id="crowdWave" aria-hidden="true">
+    <p class="wave-label" aria-hidden="true">The Crowd</p>
+    <svg id="waveSVG" class="wave-svg" viewBox="0 0 960 100" xmlns="http://www.w3.org/2000/svg"
+         aria-hidden="true" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
 
   <!-- ── Countdown ──────────────────────────────────────────── -->
   <section class="countdown-section" id="waitlist">
@@ -1127,6 +1270,66 @@
         Join The Waitlist For Early Access
       </a>
     </div>
+  </section>
+
+  <!-- ── Trophy Celebration ──────────────────────────────────── -->
+  <section class="trophy-section" aria-label="FIFA World Cup Trophy Celebration">
+    <canvas id="trophyCanvas"></canvas>
+    <div class="trophy-svg-wrap">
+      <svg id="trophySVG" viewBox="0 0 160 260" xmlns="http://www.w3.org/2000/svg" aria-label="FIFA World Cup Trophy">
+        <defs>
+          <linearGradient id="tg" x1="0.2" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stop-color="#FFE566"/>
+            <stop offset="28%" stop-color="#FFA800"/>
+            <stop offset="58%" stop-color="#FFD700"/>
+            <stop offset="100%" stop-color="#B8760A"/>
+          </linearGradient>
+          <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3A6B33"/>
+            <stop offset="100%" stop-color="#1C3D18"/>
+          </linearGradient>
+          <radialGradient id="globeG" cx="38%" cy="32%" r="62%">
+            <stop offset="0%" stop-color="#FFF0A0"/>
+            <stop offset="55%" stop-color="#FFD700"/>
+            <stop offset="100%" stop-color="#CC8800"/>
+          </radialGradient>
+        </defs>
+        <!-- Malachite base -->
+        <rect x="12" y="228" width="136" height="24" rx="3" fill="url(#mg)"/>
+        <rect x="6"  y="214" width="148" height="16" rx="2" fill="url(#mg)"/>
+        <!-- Gold trim rings -->
+        <rect x="6"   y="212" width="148" height="4" rx="1" fill="url(#tg)"/>
+        <rect x="12"  y="226" width="136" height="4" rx="1" fill="url(#tg)"/>
+        <rect x="6"   y="248" width="148" height="4" rx="1" fill="url(#tg)"/>
+        <!-- Gold pedestal -->
+        <rect x="26" y="195" width="108" height="19" rx="2" fill="url(#tg)"/>
+        <rect x="36" y="183" width="88"  height="14" rx="2" fill="url(#tg)"/>
+        <!-- Stem -->
+        <path d="M57 183 L51 152 L109 152 L103 183Z" fill="url(#tg)"/>
+        <!-- Left spiraling figure -->
+        <path d="M57 152 C47 140 43 125 47 112 C51 99 62 95 65 84 C68 73 65 62 70 56"
+              stroke="url(#tg)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Right spiraling figure -->
+        <path d="M103 152 C113 140 117 125 113 112 C109 99 98 95 95 84 C92 73 95 62 90 56"
+              stroke="url(#tg)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Left figure arms -->
+        <path d="M47 112 C39 105 35 95 39 87" stroke="url(#tg)" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M65 84 C56 77 54 67 58 59"  stroke="url(#tg)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <!-- Right figure arms -->
+        <path d="M113 112 C121 105 125 95 121 87" stroke="url(#tg)" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M95 84 C104 77 106 67 102 59" stroke="url(#tg)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <!-- Globe sphere -->
+        <circle cx="80" cy="36" r="28" fill="url(#globeG)"/>
+        <!-- Globe latitude/longitude lines -->
+        <ellipse cx="80" cy="36" rx="28" ry="13" fill="none" stroke="rgba(0,0,0,0.2)"  stroke-width="1.5"/>
+        <ellipse cx="80" cy="36" rx="15" ry="28" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+        <line x1="52" y1="36" x2="108" y2="36" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>
+        <line x1="80" y1="8"  x2="80"  y2="64"  stroke="rgba(0,0,0,0.14)" stroke-width="1.5"/>
+        <!-- Highlight -->
+        <ellipse cx="69" cy="26" rx="8" ry="5" fill="rgba(255,255,255,0.28)" transform="rotate(-28 69 26)"/>
+      </svg>
+    </div>
+    <div class="trophy-bar"><span>FIFA World Cup 2026</span></div>
   </section>
 
   <!-- ── Partner CTA ────────────────────────────────────────── -->
@@ -1262,6 +1465,8 @@
   </footer>
 
   <script>
+  // ─── Vanilla JS: Modals + Video + Nav ───────────────────────
+
   // ── 0. Waitlist Modal ────────────────────────────────────────
   (function () {
     var backdrop = document.getElementById('waitlistModal');
@@ -1375,19 +1580,10 @@
     });
   })();
 
-  // ── 1. Hero content entrance ─────────────────────────────────
-  document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(function () {
-      document.querySelectorAll('.hero-content [data-anim]').forEach(function (el) {
-        var delay = parseInt(el.dataset.delay || 0, 10);
-        setTimeout(function () { el.classList.add('is-visible'); }, delay);
-      });
-    }, 280);
-  });
-
-  // ── 2. Video blur → reveal ───────────────────────────────────
+  // ── 2. Hero videos (intro → main) then blur → reveal ───────
   (function () {
-    var video = document.getElementById('heroVideo');
+    var v1 = document.getElementById('heroVideo1');
+    var v2 = document.getElementById('heroVideo2');
     var glass = document.getElementById('heroGlass');
     var revealed = false;
 
@@ -1400,13 +1596,30 @@
       }, 1750);
     }
 
-    video.addEventListener('ended', reveal);
-    video.addEventListener('error', reveal);
+    function startMainHero() {
+      v1.style.visibility = 'hidden';
+      v1.style.pointerEvents = 'none';
+      var p = v2.play();
+      if (p !== undefined) {
+        p.catch(function () { reveal(); });
+      }
+    }
 
-    // If autoplay is blocked by browser policy, reveal immediately
-    var p = video.play();
-    if (p !== undefined) {
-      p.catch(function () { reveal(); });
+    v1.addEventListener('ended', function () {
+      startMainHero();
+    });
+    v1.addEventListener('error', function () {
+      startMainHero();
+    });
+
+    v2.addEventListener('ended', reveal);
+    v2.addEventListener('error', reveal);
+
+    var p1 = v1.play();
+    if (p1 !== undefined) {
+      p1.catch(function () {
+        startMainHero();
+      });
     }
   })();
 
@@ -1418,84 +1631,6 @@
     }
     window.addEventListener('scroll', update, { passive: true });
     update();
-  })();
-
-  // ── 4. IntersectionObserver — scroll animations ──────────────
-  (function () {
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        var el = entry.target;
-        var delay = parseInt(el.dataset.delay || 0, 10);
-        setTimeout(function () { el.classList.add('is-visible'); }, delay);
-        obs.unobserve(el);
-      });
-    }, { threshold: 0.14, rootMargin: '0px 0px -32px 0px' });
-
-    document.querySelectorAll('[data-anim]').forEach(function (el) {
-      if (!el.closest('.hero-content')) obs.observe(el);
-    });
-  })();
-
-  // ── 5. Stat number scramble ──────────────────────────────────
-  (function () {
-    var el = document.getElementById('statNumber');
-    var done = false;
-    var so = new IntersectionObserver(function (entries) {
-      if (!entries[0].isIntersecting || done) return;
-      done = true;
-      var digits = '0123456789';
-      var t0 = Date.now();
-      var dur = 900;
-      var iv = setInterval(function () {
-        var progress = (Date.now() - t0) / dur;
-        if (progress >= 1) { el.textContent = '<50'; clearInterval(iv); return; }
-        el.textContent = '<' + digits[Math.floor(Math.random() * 10)];
-      }, 55);
-      so.unobserve(el);
-    }, { threshold: 0.5 });
-    so.observe(el);
-  })();
-
-  // ── 6. Countdown ─────────────────────────────────────────────
-  (function () {
-    var target = new Date('2026-05-11T18:00:00Z').getTime();
-    var secEl  = document.getElementById('cd-seconds');
-    var busy   = false;
-
-    function pad(n) { return String(n).padStart(2, '0'); }
-
-    function tick() {
-      var diff = target - Date.now();
-      if (diff <= 0) {
-        ['cd-days','cd-hours','cd-minutes','cd-seconds'].forEach(function (id) {
-          document.getElementById(id).textContent = '00';
-        });
-        return;
-      }
-      document.getElementById('cd-days').textContent    = Math.floor(diff / 864e5);
-      document.getElementById('cd-hours').textContent   = pad(Math.floor(diff % 864e5 / 36e5));
-      document.getElementById('cd-minutes').textContent = pad(Math.floor(diff % 36e5 / 6e4));
-
-      var secs = pad(Math.floor(diff % 6e4 / 1e3));
-      if (secEl.textContent !== secs) {
-        secEl.textContent = secs;
-        if (!busy) {
-          busy = true;
-          secEl.style.transition = 'transform 0.16s ease, opacity 0.16s ease';
-          secEl.style.transform  = 'translateY(-5px)';
-          secEl.style.opacity    = '0.35';
-          setTimeout(function () {
-            secEl.style.transform = 'translateY(0)';
-            secEl.style.opacity   = '1';
-            setTimeout(function () { busy = false; }, 180);
-          }, 160);
-        }
-      }
-    }
-
-    tick();
-    setInterval(tick, 1000);
   })();
 
   // ── 7. Partner Modal ─────────────────────────────────────────
@@ -1577,6 +1712,501 @@
         this.classList.remove('field-error');
       });
     });
+  })();
+  </script>
+
+  <!-- ─── Framer Motion Upgrades ───────────────────────────── -->
+  <script type="module">
+  import { animate, scroll, inView, stagger, spring } from "motion"
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const touch   = () => window.matchMedia('(hover: none)').matches
+
+  // ── 1. Scroll progress bar ───────────────────────────────────
+  scroll(animate(".scroll-bar", { scaleX: [0, 1] }, { ease: "linear" }))
+
+  // ── 2. Hero parallax (desktop, no reduced motion) ────────────
+  if (!reduced && !touch()) {
+    scroll(
+      animate(".hero-content", { y: [0, 90] }),
+      { target: document.querySelector('.hero'), offset: ["start start", "end start"] }
+    )
+  }
+
+  // ── 3. Hero content staggered spring entrance ────────────────
+  ;(function () {
+    var heroEls = document.querySelectorAll('.hero-content [data-anim]')
+    function run() {
+      heroEls.forEach(function (el) {
+        var delay = parseFloat(el.dataset.delay || 0) / 1000
+        if (reduced) { el.style.opacity = '1'; el.style.transform = 'none'; return }
+        animate(el, { opacity: [0, 1], y: [24, 0] }, {
+          easing: spring({ stiffness: 260, damping: 26 }),
+          delay: delay
+        })
+      })
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { setTimeout(run, 280) })
+    } else {
+      setTimeout(run, 280)
+    }
+  })()
+
+  // ── 4. Section entrances (spring inView, replaces old IO) ────
+  document.querySelectorAll('[data-anim]').forEach(function (el) {
+    if (el.closest('.hero-content')) return
+    if (reduced) { el.style.opacity = '1'; el.style.transform = 'none'; return }
+    inView(el, function () {
+      var delay = parseFloat(el.dataset.delay || 0) / 1000
+      animate(el, { opacity: [0, 1], y: [28, 0] }, {
+        easing: spring({ stiffness: 280, damping: 28 }),
+        delay: delay
+      })
+    }, { amount: 0.14 })
+  })
+
+  // ── 5. Market pills stagger entrance ────────────────────────
+  var pillsContainer = document.querySelector('.market-pills')
+  if (pillsContainer) {
+    if (reduced) {
+      document.querySelectorAll('.market-pill').forEach(function (p) {
+        p.style.opacity = '1'
+      })
+    } else {
+      // Set initial hidden state
+      animate('.market-pill', { opacity: 0, scale: 0.85, y: 10 }, { duration: 0 })
+      inView(pillsContainer, function () {
+        animate('.market-pill', { opacity: [0, 1], scale: [0.85, 1], y: [10, 0] }, {
+          easing: spring({ stiffness: 400, damping: 24 }),
+          delay: stagger(0.06)
+        })
+      }, { amount: 0.25 })
+    }
+  }
+
+  // ── 6. Glass card spring hover + spotlight glow ──────────────
+  if (!touch()) {
+    document.querySelectorAll('.glass-card').forEach(function (card) {
+      card.addEventListener('mouseenter', function () {
+        animate(card, { y: -10 }, { easing: spring({ stiffness: 380, damping: 22 }) })
+      })
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect()
+        card.style.setProperty('--glow-x', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%')
+        card.style.setProperty('--glow-y', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%')
+      })
+      card.addEventListener('mouseleave', function () {
+        animate(card, { y: 0 }, { easing: spring({ stiffness: 300, damping: 26 }) })
+      })
+    })
+  }
+
+  // ── 7. Magnetic CTA buttons ──────────────────────────────────
+  if (!reduced && !touch()) {
+    document.querySelectorAll('[data-waitlist], [data-partner]').forEach(function (btn) {
+      btn.addEventListener('mousemove', function (e) {
+        var r = btn.getBoundingClientRect()
+        animate(btn, {
+          x: (e.clientX - r.left - r.width  / 2) * 0.22,
+          y: (e.clientY - r.top  - r.height / 2) * 0.22
+        }, { easing: spring({ stiffness: 500, damping: 28 }) })
+      })
+      btn.addEventListener('mouseleave', function () {
+        animate(btn, { x: 0, y: 0 }, { easing: spring({ stiffness: 300, damping: 22 }) })
+      })
+    })
+  }
+
+  // ── 8. Stat counter (spring count-up) ────────────────────────
+  var statEl   = document.getElementById('statNumber')
+  var statDone = false
+  if (statEl) {
+    inView(statEl, function () {
+      if (statDone) return; statDone = true
+      if (reduced) { statEl.textContent = '<50'; return }
+      animate(0, 50, {
+        duration: 1.4,
+        ease: [0.16, 1, 0.3, 1],
+        onUpdate: function (v) { statEl.textContent = '<' + Math.round(v) }
+      })
+    }, { amount: 0.5 })
+  }
+
+  // ── 9. Countdown with spring digit flip ──────────────────────
+  ;(function () {
+    var TARGET = new Date('2026-05-11T18:00:00Z').getTime()
+    var pad = function (n) { return String(n).padStart(2, '0') }
+    var dEl = document.getElementById('cd-days')
+    var hEl = document.getElementById('cd-hours')
+    var mEl = document.getElementById('cd-minutes')
+    var sEl = document.getElementById('cd-seconds')
+    if (!sEl) return
+
+    var prev = { d: null, h: null, m: null, s: null }
+    var busy = {}
+
+    function flipTo(el, val) {
+      if (busy[el.id]) { el.textContent = val; return }
+      busy[el.id] = true
+      animate(el, { y: -10, opacity: 0 }, { duration: 0.1, ease: 'ease-in' }).then(function () {
+        el.textContent = val
+        animate(el, { y: [8, 0], opacity: [0, 1] }, {
+          easing: spring({ stiffness: 600, damping: 32 })
+        }).then(function () { busy[el.id] = false })
+      })
+    }
+
+    function tick() {
+      var diff = TARGET - Date.now()
+      if (diff <= 0) {
+        [dEl, hEl, mEl, sEl].forEach(function (el) { el.textContent = '00' }); return
+      }
+      var d = String(Math.floor(diff / 864e5))
+      var h = pad(Math.floor(diff % 864e5 / 36e5))
+      var m = pad(Math.floor(diff % 36e5 / 6e4))
+      var s = pad(Math.floor(diff % 6e4 / 1e3))
+
+      if (d !== prev.d) { prev.d = d; reduced ? (dEl.textContent = d) : flipTo(dEl, d) }
+      if (h !== prev.h) { prev.h = h; reduced ? (hEl.textContent = h) : flipTo(hEl, h) }
+      if (m !== prev.m) { prev.m = m; reduced ? (mEl.textContent = m) : flipTo(mEl, m) }
+      if (s !== prev.s) { prev.s = s; reduced ? (sEl.textContent = s) : flipTo(sEl, s) }
+    }
+
+    tick()
+    setInterval(tick, 1000)
+  })()
+
+  // ── 10. People wave SVG ──────────────────────────────────────
+  ;(function () {
+    var svg = document.getElementById('waveSVG')
+    if (!svg) return
+    var COUNT = 24, SP = 40, CY = 92, SW = 2
+
+    function el(tag, attrs) {
+      var e = document.createElementNS('http://www.w3.org/2000/svg', tag)
+      Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]) })
+      return e
+    }
+
+    for (var i = 0; i < COUNT; i++) {
+      var cx = i * SP + SP / 2
+      var g = el('g', { id: 'wp-' + i })
+      // Head
+      g.appendChild(el('circle', { cx: cx, cy: CY-64, r: 7, stroke: 'var(--ink)', 'stroke-width': SW }))
+      // Body
+      g.appendChild(el('line', { x1: cx, y1: CY-57, x2: cx, y2: CY-28, stroke: 'var(--ink)', 'stroke-width': SW }))
+      // Left arm
+      var laG = el('g', { id: 'wla-' + i })
+      laG.style.transformOrigin = cx + 'px ' + (CY - 46) + 'px'
+      laG.appendChild(el('line', { x1: cx, y1: CY-46, x2: cx-15, y2: CY-34, stroke: 'var(--ink)', 'stroke-width': SW }))
+      g.appendChild(laG)
+      // Right arm
+      var raG = el('g', { id: 'wra-' + i })
+      raG.style.transformOrigin = cx + 'px ' + (CY - 46) + 'px'
+      raG.appendChild(el('line', { x1: cx, y1: CY-46, x2: cx+15, y2: CY-34, stroke: 'var(--ink)', 'stroke-width': SW }))
+      g.appendChild(raG)
+      // Legs
+      g.appendChild(el('line', { x1: cx, y1: CY-28, x2: cx-9, y2: CY, stroke: 'var(--ink)', 'stroke-width': SW }))
+      g.appendChild(el('line', { x1: cx, y1: CY-28, x2: cx+9, y2: CY, stroke: 'var(--ink)', 'stroke-width': SW }))
+      svg.appendChild(g)
+    }
+
+    var waveTimer
+    function runWave(rtl) {
+      for (var k = 0; k < COUNT; k++) {
+        var i = rtl ? COUNT - 1 - k : k
+        var d = k * 0.07
+        var sp = { easing: spring({ stiffness: 200, damping: 12 }), delay: d, duration: 0.65 }
+        animate('#wp-'  + i, { y: [0, -12, 0] },    sp)
+        animate('#wla-' + i, { rotate: [0, -118, 0] }, sp)
+        animate('#wra-' + i, { rotate: [0,  118, 0] }, sp)
+      }
+      return (COUNT - 1) * 0.07 + 0.9
+    }
+
+    if (!reduced) {
+      inView('#crowdWave', function () {
+        var dir = false
+        function loop() {
+          var dur = runWave(dir)
+          dir = !dir
+          waveTimer = setTimeout(loop, (dur + 1.4) * 1000)
+        }
+        loop()
+        return function () { clearTimeout(waveTimer) }
+      })
+    } else {
+      // static: arms slightly raised
+      for (var j = 0; j < COUNT; j++) {
+        document.getElementById('wla-' + j).style.transform = 'rotate(-30deg)'
+        document.getElementById('wra-' + j).style.transform = 'rotate(30deg)'
+      }
+    }
+  })()
+  </script>
+  <script>
+  // ─── Stadium Device Map Canvas ──────────────────────────────
+  (function () {
+    var canvas = document.getElementById('stadiumCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H, CX, CY, nodes = [];
+    var t = 0, scanA = 0, lastTS = 0, CYCLE = 13;
+    var active = false; // pause when off-screen (perf: main-thread-budget)
+    new IntersectionObserver(function (entries) {
+      active = entries[0].isIntersecting;
+    }, { threshold: 0.1 }).observe(canvas);
+    var ROWS = [
+      { rx: 0.44, ry: 0.40, n: 28 },
+      { rx: 0.38, ry: 0.34, n: 24 },
+      { rx: 0.31, ry: 0.28, n: 20 },
+      { rx: 0.25, ry: 0.22, n: 16 },
+      { rx: 0.19, ry: 0.17, n: 12 },
+      { rx: 0.13, ry: 0.12, n:  8 }
+    ];
+
+    function build() {
+      W = canvas.width  = canvas.offsetWidth;
+      H = canvas.height = Math.round(W * 0.52);
+      CX = W / 2; CY = H * 0.47;
+      nodes = [];
+      ROWS.forEach(function (cfg, row) {
+        var rx = W * cfg.rx, ry = H * cfg.ry * 0.82;
+        for (var j = 0; j < cfg.n; j++) {
+          var a = (j / cfg.n) * Math.PI * 2 - Math.PI * 0.5;
+          nodes.push({ x: CX + Math.cos(a) * rx, y: CY + Math.sin(a) * ry,
+            row: row, a: a, state: 'off', vis: false, ringR: 3, ringA: 0 });
+        }
+      });
+    }
+    build();
+    window.addEventListener('resize', function () { build(); t = 0; scanA = 0; });
+
+    function frame(ts) {
+      requestAnimationFrame(frame);
+      if (!active) { lastTS = ts; return; } // pause off-screen
+      var dt = Math.min((ts - lastTS) / 1000, 0.05); lastTS = ts; t += dt;
+      if (t > CYCLE) {
+        t = 0; scanA = 0;
+        nodes.forEach(function (n) { n.state = 'off'; n.vis = false; n.ringR = 3; n.ringA = 0; });
+      }
+      ctx.fillStyle = '#040810'; ctx.fillRect(0, 0, W, H);
+      // Grid lines
+      ctx.strokeStyle = 'rgba(28,160,220,0.04)'; ctx.lineWidth = 0.5;
+      for (var gx = 0; gx < W; gx += 44) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+      for (var gy = 0; gy < H; gy += 44) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+      // Stadium ellipses draw-in
+      var dp = Math.min(1, t / 1.6);
+      ROWS.forEach(function (cfg, i) {
+        var rp = Math.max(0, Math.min(1, dp * ROWS.length - i));
+        if (!rp) return;
+        ctx.beginPath();
+        ctx.ellipse(CX, CY, W * cfg.rx, H * cfg.ry * 0.82, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(28,195,255,' + (0.22 * rp) + ')';
+        ctx.lineWidth = 0.9; ctx.stroke();
+      });
+      // Center field
+      if (dp > 0.55) {
+        var fa = Math.min(1, (dp - 0.55) * 2.5);
+        ctx.beginPath(); ctx.ellipse(CX, CY, W * 0.08, H * 0.065 * 0.82, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(18,78,26,' + (0.3 * fa) + ')'; ctx.fill();
+        ctx.strokeStyle = 'rgba(28,195,255,' + (0.1 * fa) + ')'; ctx.lineWidth = 0.7; ctx.stroke();
+      }
+      // Nodes appear
+      if (t > 1.6) {
+        var ap = Math.min(1, (t - 1.6) / 1.4);
+        nodes.forEach(function (n, i) { if (ap > (i / nodes.length) * 0.9) n.vis = true; });
+      }
+      // Scan beam
+      if (t > 2.8 && t < 9.5) {
+        scanA += dt * 1.35;
+        ctx.save(); ctx.translate(CX, CY); ctx.rotate(scanA);
+        var bg = ctx.createLinearGradient(0, 0, W * 0.46, 0);
+        bg.addColorStop(0, 'rgba(255,120,0,0.2)'); bg.addColorStop(1, 'rgba(255,120,0,0)');
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, W * 0.46, -0.5, 0.5); ctx.closePath();
+        ctx.fillStyle = bg; ctx.fill(); ctx.restore();
+        nodes.forEach(function (n) {
+          if (!n.vis || n.state === 'locked') return;
+          var diff = ((scanA - Math.atan2(n.y - CY, n.x - CX)) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+          n.state = diff < 0.55 ? 'scanning' : 'off';
+        });
+      }
+      // Lock nodes
+      if (t > 5.2) {
+        var lp = Math.min(1, (t - 5.2) / 4.2);
+        var lockN = Math.floor(lp * nodes.length);
+        nodes.forEach(function (n, i) {
+          if (n.state === 'locked' || !n.vis) return;
+          if (i < lockN) { n.state = 'locked'; n.ringR = 3; n.ringA = 0.9; }
+        });
+      }
+      // Network lines
+      if (t > 8.5) {
+        var la = Math.min(0.1, (t - 8.5) * 0.05);
+        var lk = nodes.filter(function (n) { return n.state === 'locked'; });
+        for (var a = 0; a < lk.length; a++) {
+          for (var b = a + 1; b < lk.length; b++) {
+            var dx = lk[a].x - lk[b].x, dy = lk[a].y - lk[b].y;
+            if (dx*dx + dy*dy < 3025) {
+              ctx.beginPath(); ctx.moveTo(lk[a].x, lk[a].y); ctx.lineTo(lk[b].x, lk[b].y);
+              ctx.strokeStyle = 'rgba(255,77,0,' + la + ')'; ctx.lineWidth = 0.4; ctx.stroke();
+            }
+          }
+        }
+      }
+      // Draw nodes
+      nodes.forEach(function (n) {
+        if (!n.vis) return;
+        if (n.state === 'locked') {
+          n.ringR += dt * 16; n.ringA = Math.max(0, n.ringA - dt * 1.1);
+          if (n.ringA <= 0 && Math.random() < dt * 0.18) { n.ringR = 3; n.ringA = 0.35; }
+          if (n.ringA > 0) {
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.ringR, 0, Math.PI*2);
+            ctx.strokeStyle = 'rgba(255,77,0,' + n.ringA + ')'; ctx.lineWidth = 1; ctx.stroke();
+          }
+          var gl = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, 8);
+          gl.addColorStop(0, 'rgba(255,77,0,0.28)'); gl.addColorStop(1, 'rgba(255,77,0,0)');
+          ctx.beginPath(); ctx.arc(n.x, n.y, 8, 0, Math.PI*2); ctx.fillStyle = gl; ctx.fill();
+          ctx.beginPath(); ctx.arc(n.x, n.y, 2.5, 0, Math.PI*2); ctx.fillStyle = '#FF4D00'; ctx.fill();
+        } else {
+          ctx.beginPath(); ctx.arc(n.x, n.y, 2, 0, Math.PI*2);
+          ctx.fillStyle = 'rgba(255,255,255,' + (n.state === 'scanning' ? 0.72 : 0.19) + ')'; ctx.fill();
+        }
+      });
+      // Coordinate labels + sync text
+      if (t > 9.8) {
+        var ta = Math.min(1, (t - 9.8) / 1.2);
+        ctx.globalAlpha = ta;
+        ctx.fillStyle = '#FF4D00';
+        ctx.font = '600 ' + Math.max(9, Math.round(W * 0.012)) + 'px "SF Mono",Menlo,monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('80,000+ DEVICES SYNCHRONIZED', CX, H - 16);
+        ctx.fillStyle = '#FF9A3C';
+        ctx.font = Math.max(7, Math.round(W * 0.009)) + 'px "SF Mono",Menlo,monospace';
+        ctx.textAlign = 'left';
+        [8, 30, 58, 85].forEach(function (idx) {
+          var n = nodes[idx];
+          if (n && n.state === 'locked') {
+            ctx.fillText((40.42 + n.x/W * 0.18).toFixed(3) + '°N', n.x + 6, n.y - 3);
+          }
+        });
+        ctx.globalAlpha = 1;
+      }
+    }
+    requestAnimationFrame(function (ts) { lastTS = ts; frame(ts); });
+  })();
+
+  // ─── Trophy Celebration Canvas ───────────────────────────────
+  (function () {
+    var canvas = document.getElementById('trophyCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H, particles = [], fans = [], lastTS = 0;
+    var COLS = ['rgba(255,77,0,0.9)','rgba(255,185,0,0.9)','rgba(255,230,70,0.9)',
+                'rgba(255,255,255,0.7)','rgba(255,150,50,0.85)'];
+
+    function resize() {
+      W = canvas.width  = canvas.offsetWidth;
+      H = canvas.height = canvas.offsetHeight;
+      buildFans(); buildParticles();
+    }
+
+    function buildParticles() {
+      particles = [];
+      var n = Math.min(130, Math.round(W * 0.11));
+      for (var i = 0; i < n; i++) spawnParticle(Math.random(), true);
+    }
+
+    function spawnParticle(yFrac, init) {
+      particles.push({
+        x: Math.random() * W,
+        y: init ? H * (1 - yFrac) : H + 10,
+        vx: (Math.random() - 0.5) * 1.3,
+        vy: -(0.9 + Math.random() * 1.8),
+        r:  2 + Math.random() * 4,
+        rot: Math.random() * Math.PI * 2,
+        rs: (Math.random() - 0.5) * 3.5,
+        col: COLS[Math.floor(Math.random() * COLS.length)],
+        rect: Math.random() < 0.6,
+        w: 4 + Math.random() * 7, h: 2 + Math.random() * 3
+      });
+    }
+
+    function buildFans() {
+      fans = [];
+      var N = 5, sp = W * 0.075, by = H * 0.80;
+      for (var i = 0; i < N; i++) {
+        fans.push({ x: W*0.12 + i*sp, y: by, ph: i*0.45, spd: 2.2+Math.random()*0.6, s: 1 });
+        fans.push({ x: W*0.88 - i*sp, y: by, ph: i*0.45+0.25, spd: 2.2+Math.random()*0.6, s: 1 });
+      }
+    }
+
+    function drawFan(f, time) {
+      var jump = Math.max(0, Math.sin(time * f.spd + f.ph)) * 16;
+      var arm  = Math.max(0, Math.sin(time * f.spd + f.ph));
+      var x = f.x, y = f.y - jump, s = f.s * (W < 600 ? 0.65 : 1);
+      var hr = 9*s, bl = 22*s, al = 16*s, ll = 18*s;
+      var hy = y - ll - bl - hr;
+      var sy = y - ll - bl*0.58;
+      var hy2 = y - ll;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.55 + arm * 0.3) + ')';
+      ctx.lineWidth = 1.6 * s; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      // Head
+      ctx.beginPath(); ctx.arc(x, hy, hr, 0, Math.PI*2); ctx.stroke();
+      // Body
+      ctx.beginPath(); ctx.moveTo(x, hy+hr); ctx.lineTo(x, hy2); ctx.stroke();
+      // Left arm
+      var la = Math.PI*0.52 + arm * (-Math.PI*1.12);
+      ctx.beginPath(); ctx.moveTo(x, sy); ctx.lineTo(x + Math.cos(la)*al, sy + Math.sin(la)*al); ctx.stroke();
+      // Right arm
+      var ra = Math.PI*0.48 + arm * (Math.PI*1.12);
+      ctx.beginPath(); ctx.moveTo(x, sy); ctx.lineTo(x + Math.cos(ra)*al, sy + Math.sin(ra)*al); ctx.stroke();
+      // Legs (slight spread when jumping)
+      var lsp = jump > 4 ? 0.22 : 0;
+      ctx.beginPath(); ctx.moveTo(x, hy2); ctx.lineTo(x - 10*s, hy2 + ll*(1-lsp)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, hy2); ctx.lineTo(x + 10*s, hy2 + ll*(1-lsp)); ctx.stroke();
+      ctx.restore();
+    }
+
+    var trophyActive = false;
+    new IntersectionObserver(function (e) { trophyActive = e[0].isIntersecting; }, { threshold: 0.1 }).observe(canvas);
+
+    function frame(ts) {
+      requestAnimationFrame(frame);
+      if (!trophyActive) { lastTS = ts; return; } // pause off-screen
+      var dt = Math.min((ts - lastTS) / 1000, 0.05); lastTS = ts;
+      var time = ts / 1000;
+      ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, W, H);
+      var cx = W/2, cy = H*0.40;
+      var gl = ctx.createRadialGradient(cx, cy, 0, cx, cy, W*0.26);
+      gl.addColorStop(0, 'rgba(255,185,0,0.14)'); gl.addColorStop(1, 'rgba(255,185,0,0)');
+      ctx.fillStyle = gl; ctx.fillRect(0,0,W,H);
+      particles.forEach(function (p, i) {
+        p.x += p.vx + Math.sin(time*0.8 + p.y*0.008) * 0.35;
+        p.y += p.vy; p.vy += dt * 0.07; p.rot += p.rs * dt;
+        if (p.y < -20) {
+          particles[i] = {
+            x: Math.random()*W, y: H+10,
+            vx: (Math.random()-0.5)*1.3, vy: -(0.9+Math.random()*1.8),
+            r: 2+Math.random()*4, rot: Math.random()*Math.PI*2, rs: (Math.random()-0.5)*3.5,
+            col: COLS[Math.floor(Math.random()*COLS.length)],
+            rect: Math.random()<0.6, w: 4+Math.random()*7, h: 2+Math.random()*3
+          };
+        }
+        ctx.save(); ctx.globalAlpha = 0.78;
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.col;
+        if (p.rect) { ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); }
+        else { ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); }
+        ctx.restore();
+      });
+      fans.forEach(function (f) { drawFan(f, time); });
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(function (ts) { lastTS = ts; frame(ts); });
   })();
   </script>
 </body>
