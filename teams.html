@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF4D00">
+    <title>Our Team | Ultra</title>
+    <link rel="icon" type="image/png" href="ultra-logo-icon.png">
+    <link rel="apple-touch-icon" href="ultra-logo-icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-tertiary: #666666;
+            --accent: #ffffff;
+            --border: #1a1a1a;
+        }
+
+        body.light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e5e5e5;
+            --text-primary: #000000;
+            --text-secondary: #333333;
+            --text-tertiary: #666666;
+            --accent: #000000;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 24px 0;
+        }
+
+        body.light-mode .nav {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-link:hover {
+            opacity: 0.7;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        body.light-mode .theme-toggle {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body.light-mode .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.15);
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 180px 60px 100px;
+            text-align: center;
+            background: var(--bg-primary);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Team Section */
+        .team-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 60px 140px;
+        }
+
+        .team-member {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 100px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .team-member:nth-child(1) { animation-delay: 0.1s; }
+        .team-member:nth-child(2) { animation-delay: 0.2s; }
+        .team-member:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .team-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body.light-mode .team-photo {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-mode .team-photo:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-info h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .team-role {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .team-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            letter-spacing: 0.01em;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-primary);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            padding: 48px 0;
+            font-weight: 300;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-mode .footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .footer-column h3 {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .footer-column p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-column .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        body.light-mode .footer-bottom {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 20px;
+            }
+
+            .logo-img {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+            }
+
+            .theme-toggle {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .hero {
+                padding: 120px 20px 60px;
+            }
+
+            .hero h1 {
+                font-size: clamp(2rem, 7vw, 2.5rem);
+                margin-bottom: 1.2rem;
+            }
+
+            .hero p {
+                font-size: clamp(1rem, 4vw, 1.2rem);
+                padding: 0 10px;
+            }
+
+            .team-section {
+                padding: 30px 20px 80px;
+            }
+
+            .team-member {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                text-align: center;
+                margin-bottom: 60px;
+            }
+
+            .team-photo {
+                width: 160px;
+                height: 160px;
+                margin: 0 auto;
+            }
+
+            .team-info h2 {
+                font-size: 1.5rem;
+            }
+
+            .team-role {
+                font-size: 1rem;
+            }
+
+            .team-description {
+                font-size: 0.95rem;
+                line-height: 1.7;
+            }
+
+            .footer {
+                padding: 40px 0;
+            }
+
+            .footer-container {
+                padding: 0 20px;
+            }
+
+            .footer-grid {
+                gap: 28px;
+            }
+
+            .footer-column h3 {
+                font-size: 1rem;
+            }
+
+            .footer-column p,
+            .footer-column a,
+            .footer-text {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .hero {
+                padding: 110px 16px 50px;
+            }
+
+            .hero h1 {
+                font-size: clamp(1.8rem, 8vw, 2.2rem);
+            }
+
+            .team-section {
+                padding: 20px 16px 60px;
+            }
+
+            .team-member {
+                margin-bottom: 50px;
+            }
+
+            .team-photo {
+                width: 140px;
+                height: 140px;
+            }
+
+            .team-info h2 {
+                font-size: 1.3rem;
+            }
+
+            .team-role {
+                font-size: 0.95rem;
+            }
+
+            .team-description {
+                font-size: 0.9rem;
+            }
+
+            .footer-container {
+                padding: 0 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo-link">
+                <img src="ultra-logo-icon.png" alt="Ultra" class="logo-img" width="40" height="40">
+            </a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Meet Our Team</h1>
+        <p>The minds behind Ultra, building AI-powered stadium sync for the World Cup and beyond.</p>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <!-- Team Member 1 -->
+        <div class="team-member">
+            <img src="images/p1.png" alt="Sheikh Shessi" class="team-photo">
+            <div class="team-info">
+                <h2>Sheikh Shessi</h2>
+                <div class="team-role">Founder & Team Lead</div>
+                <p class="team-description">
+                    UN-recognized entrepreneur and Gen AI expert specializing in agent orchestration systems. Previously awarded funding for BridgePK, a social edtech startup. Computer Science & Business Entrepreneurship major with deep expertise in building intelligent automation layers that transform how businesses operate.
+                </p>
+            </div>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="team-member">
+            <img src="images/p3.png" alt="Mehar" class="team-photo">
+            <div class="team-info">
+                <h2>Mehar</h2>
+                <div class="team-role">AI/ML Lead</div>
+                <p class="team-description">
+                    Led the Lahore chapter of the NASA SpaceX Hackathon—the world's largest hackathon. Specializes in LLM fine-tuning and building custom AI applications that leverage proprietary business data to deliver competitive advantages.
+                </p>
+            </div>
+        </div>
+
+        <!-- Team Member 3 -->
+        <div class="team-member">
+            <img src="images/p4.png" alt="Ajwad" class="team-photo">
+            <div class="team-info">
+                <h2>Ajwad</h2>
+                <div class="team-role">Voice AI Specialist</div>
+                <p class="team-description">
+                    Developer at Edly, a Silicon Valley startup serving MIT and Cambridge. Expert in text-to-speech voice agent development, creating natural, intelligent voice systems that handle complex business communications at scale.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Ultra</h3>
+                    <p>AI-powered fan sync for the stadium in your pocket.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#waitlist">Waitlist</a></li>
+                        <li><a href="teams.html">Team</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li class="footer-text">join@ultrachant.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2026 Ultra. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        let isDarkMode = true;
+
+        if (themeToggle && themeIcon) {
+            themeToggle.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+
+                if (isDarkMode) {
+                    document.body.classList.remove('light-mode');
+                    themeIcon.textContent = '🌙';
+                } else {
+                    document.body.classList.add('light-mode');
+                    themeIcon.textContent = '☀️';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#FF4D00">
   <title>Ultra | AI-Powered Fan Sync</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF4D00'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='system-ui%2C-apple-system%2Csans-serif' font-weight='700' font-size='20' fill='white'%3EU%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="ultra-logo-icon.png">
+  <link rel="apple-touch-icon" href="ultra-logo-icon.png">
   <style>
     /* ─── Reset ─────────────────────────────────────────────── */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
@@ -99,6 +100,9 @@
       align-items: center;
     }
     .nav-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
       font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: 0.2em;
@@ -106,6 +110,13 @@
       color: #fff;
       text-decoration: none;
       transition: color 0.45s ease, opacity 0.2s ease;
+    }
+    .nav-logo__mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      flex-shrink: 0;
     }
     .nav-logo:hover { opacity: 0.75 }
     .nav-logo span { color: var(--orange) }
@@ -674,12 +685,22 @@
       flex-wrap: wrap;
     }
     .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.7);
       text-decoration: none;
+    }
+    .footer-logo__mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
     }
     .footer-logo span { color: var(--orange) }
     .footer-nav { display: flex; gap: 28px }
@@ -942,7 +963,7 @@
   <!-- ── Navigation ─────────────────────────────────────────── -->
   <nav class="nav" id="mainNav">
     <div class="nav-container">
-      <a href="#" class="nav-logo">ULTRA<span>.</span></a>
+      <a href="#" class="nav-logo"><img src="ultra-logo-icon.png" alt="" class="nav-logo__mark" width="36" height="36">ULTRA<span>.</span></a>
       <a href="#" class="nav-link" data-waitlist>Early Access</a>
     </div>
   </nav>
@@ -1227,14 +1248,15 @@
   <!-- ── Footer ─────────────────────────────────────────────── -->
   <footer class="footer">
     <div class="footer-row">
-      <a href="#" class="footer-logo">ULTRA<span>.</span></a>
+      <a href="#" class="footer-logo"><img src="ultra-logo-icon.png" alt="" class="footer-logo__mark" width="32" height="32">ULTRA<span>.</span></a>
       <nav class="footer-nav">
         <a href="#">Home</a>
         <a href="#waitlist">Waitlist</a>
-        <a href="mailto:hello@weareultra.app">Contact</a>
+        <a href="teams.html">Team</a>
+        <a href="mailto:join@ultrachant.com">Contact</a>
       </nav>
-      <a href="mailto:hello@weareultra.app" class="footer-email">hello@weareultra.app</a>
-      <span class="footer-domain">weareultra.app</span>
+      <a href="mailto:join@ultrachant.com" class="footer-email">join@ultrachant.com</a>
+      <span class="footer-domain">ultrachant.com</span>
     </div>
     <div class="footer-bottom">&copy; 2026 Ultra. All rights reserved.</div>
   </footer>
